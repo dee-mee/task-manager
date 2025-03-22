@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Task Manager
+Comment=Personal Task Management Application
+Exec=/usr/local/bin/todo_app/todo_app
+Icon=/usr/local/share/icons/todo_app.png
+Terminal=false
+Categories=Utility;Office;

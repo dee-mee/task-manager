@@ -1,0 +1,143 @@
+<!-- todo_app/templates/todo_app/task_detail.html -->
+{% extends "todo_app/base.html" %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">{% if task.id %}Edit Task{% else %}New Task{% endif %}</h1>
+        <a href="{% url 'todo_app:task_list' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Tasks
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-body">
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="id_title" class="form-label">Title</label>
+                            <input type="text" class="form-control {% if form.title.errors %}is-invalid{% endif %}" 
+                                   id="id_title" name="title" value="{{ form.title.value|default:'' }}" required>
+                            {% if form.title.errors %}
+                                <div class="invalid-feedback">{{ form.title.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="id_description" class="form-label">Description</label>
+                            <textarea class="form-control {% if form.description.errors %}is-invalid{% endif %}" 
+                                      id="id_description" name="description" rows="4">{{ form.description.value|default:'' }}</textarea>
+                            {% if form.description.errors %}
+                                <div class="invalid-feedback">{{ form.description.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="id_due_date" class="form-label">Due Date</label>
+                                    <input type="date" class="form-control {% if form.due_date.errors %}is-invalid{% endif %}" 
+                                           id="id_due_date" name="due_date" value="{{ form.due_date.value|date:'Y-m-d'|default:'' }}">
+                                    {% if form.due_date.errors %}
+                                        <div class="invalid-feedback">{{ form.due_date.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="id_priority" class="form-label">Priority</label>
+                                    <select class="form-select {% if form.priority.errors %}is-invalid{% endif %}" 
+                                            id="id_priority" name="priority">
+                                        {% for value, label in form.fields.priority.choices %}
+                                            <option value="{{ value }}" {% if form.priority.value == value %}selected{% endif %}>
+                                                {{ label }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                    {% if form.priority.errors %}
+                                        <div class="invalid-feedback">{{ form.priority.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="id_status" class="form-label">Status</label>
+                                    <select class="form-select {% if form.status.errors %}is-invalid{% endif %}" 
+                                            id="id_status" name="status">
+                                        {% for value, label in form.fields.status.choices %}
+                                            <option value="{{ value }}" {% if form.status.value == value %}selected{% endif %}>
+                                                {{ label }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                    {% if form.status.errors %}
+                                        <div class="invalid-feedback">{{ form.status.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="id_progress" class="form-label">Progress (%)</label>
+                                    <input type="number" class="form-control {% if form.progress.errors %}is-invalid{% endif %}" 
+                                           id="id_progress" name="progress" min="0" max="100" 
+                                           value="{{ form.progress.value|default:0 }}">
+                                    {% if form.progress.errors %}
+                                        <div class="invalid-feedback">{{ form.progress.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{% url 'todo_app:task_list' %}" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Save Task
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        {% if task.id %}
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Task Details</h5>
+                    <div class="mb-3">
+                        <div class="progress" style="height: 25px;">
+                            <div class="progress-bar bg-{{ task.get_status_color }}" role="progressbar" 
+                                 style="width: {{ task.progress }}%;" aria-valuenow="{{ task.progress }}" 
+                                 aria-valuemin="0" aria-valuemax="100">
+                                {{ task.progress }}%
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <small class="text-muted">Created:</small>
+                        <br>
+                        <span>{{ task.created_date|date:"M d, Y" }}</span>
+                    </div>
+                    <div class="mb-2">
+                        <small class="text-muted">Last Updated:</small>
+                        <br>
+                        <span>{{ task.updated_date|date:"M d, Y" }}</span>
+                    </div>
+                    <hr>
+                    <div class="d-grid">
+                        <a href="{% url 'todo_app:delete_task' task.id %}" class="btn btn-danger">
+                            <i class="fas fa-trash-alt me-2"></i>Delete Task
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

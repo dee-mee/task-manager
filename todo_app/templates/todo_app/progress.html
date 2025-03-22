@@ -1,0 +1,139 @@
+{% extends "todo_app/base.html" %}
+{% block content %}
+<style>
+.progress { height: 25px }
+.progress-bar { line-height: 25px; text-align: center }
+.table { margin-bottom: 0 }
+.card-body { padding: 1.25rem }
+.chart-container { height: 300px }
+</style>
+<div class="container-fluid">
+    <!-- Overall Progress -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Overall Progress</h4>
+                    <div class="progress">
+                        <div class="progress-bar bg-success" role="progressbar" aria-valuenow="{{ overall_progress }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ overall_progress }}%">{{ overall_progress }}%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Priority Distribution</h4>
+                    <div class="chart-container">
+                        <canvas id="priorityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Task Status</h4>
+                    <div class="chart-container">
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Recent Activity</h4>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Task</th>
+                                    <th>Status</th>
+                                    <th>Progress</th>
+                                    <th>Last Updated</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for task in recent_tasks %}
+                                <tr>
+                                    <td>{{ task.title }}</td>
+                                    <td>
+                                        <span class="badge bg-{% if task.status == 'completed' %}success{% elif task.status == 'in_progress' %}warning{% else %}secondary{% endif %}">
+                                            {{ task.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="progress">
+                                            <div class="progress-bar" role="progressbar" aria-valuenow="{{ task.progress }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ task.progress }}%">{{ task.progress }}%</div>
+                                        </div>
+                                    </td>
+                                    <td>{{ task.created_date|date:"M d, Y" }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    'use strict';
+
+    var config = {
+        type: 'doughnut',
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { 
+                legend: { 
+                    position: 'bottom',
+                    labels: { padding: 20 }
+                }
+            }
+        }
+    };
+
+    [
+        {
+            id: 'priorityChart',
+            data: {
+                labels: ['High', 'Medium', 'Low'],
+                datasets: [{
+                    data: [{{ high_priority }}, {{ medium_priority }}, {{ low_priority }}],
+                    backgroundColor: ['#dc3545', '#ffc107', '#28a745']
+                }]
+            }
+        },
+        {
+            id: 'statusChart',
+            data: {
+                labels: ['Completed', 'In Progress', 'Not Started'],
+                datasets: [{
+                    data: [{{ completed_tasks }}, {{ in_progress_tasks }}, {{ not_started_tasks }}],
+                    backgroundColor: ['#28a745', '#ffc107', '#6c757d']
+                }]
+            }
+        }
+    ].forEach(function(chart) {
+        var ctx = document.getElementById(chart.id).getContext('2d');
+        new Chart(ctx, Object.assign({}, config, { data: chart.data }));
+    });
+});
+</script>
+{% endblock %}

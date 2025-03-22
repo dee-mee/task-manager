@@ -1,0 +1,80 @@
+{% extends "todo_app/base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title mb-4">{% if task %}Edit Task{% else %}Add New Task{% endif %}</h2>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="id_title" class="form-label">Title</label>
+                            <input type="text" name="title" id="id_title" class="form-control" value="{{ task.title|default:'' }}" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="id_description" class="form-label">Description</label>
+                            <textarea name="description" id="id_description" class="form-control" rows="3">{{ task.description|default:'' }}</textarea>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="id_due_date" class="form-label">Due Date</label>
+                                <input type="date" name="due_date" id="id_due_date" class="form-control" value="{{ task.due_date|date:'Y-m-d'|default:'' }}">
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="id_priority" class="form-label">Priority</label>
+                                <select name="priority" id="id_priority" class="form-select">
+                                    <option value="low" {% if task.priority == 'low' %}selected{% endif %}>Low</option>
+                                    <option value="medium" {% if not task or task.priority == 'medium' %}selected{% endif %}>Medium</option>
+                                    <option value="high" {% if task.priority == 'high' %}selected{% endif %}>High</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="id_status" class="form-label">Status</label>
+                                <select name="status" id="id_status" class="form-select" onchange="toggleProgress(this.value)">
+                                    <option value="not_started" {% if not task or task.status == 'not_started' %}selected{% endif %}>Not Started</option>
+                                    <option value="in_progress" {% if task.status == 'in_progress' %}selected{% endif %}>In Progress</option>
+                                    <option value="completed" {% if task.status == 'completed' %}selected{% endif %}>Completed</option>
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="id_progress" class="form-label">Progress</label>
+                                <div class="input-group">
+                                    <input type="number" name="progress" id="id_progress" class="form-control" min="0" max="100" value="{{ task.progress|default:0 }}">
+                                    <span class="input-group-text">%</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{% url 'todo_app:task_list' %}" class="btn btn-secondary me-md-2">Cancel</a>
+                            <button type="submit" class="btn btn-primary">{% if task %}Update{% else %}Create{% endif %} Task</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleProgress(status) {
+    const progressInput = document.getElementById('id_progress');
+    if (status === 'completed') {
+        progressInput.value = '100';
+    } else if (status === 'not_started') {
+        progressInput.value = '0';
+    }
+}
+</script>
+{% endblock %}
