@@ -32,7 +32,7 @@ sudo apt-get install python3-pyqt6
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/task-manager.git
+git clone https://github.com/dee-mee/task-manager.git
 cd task-manager
 ```
 
